@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opencv Project</title>
+    <script async src="js/opencv.js"></script>
+</head>
+<body>
+    <img id="input_image">
+    <input type="file" id="file_input">
+    <canvas id="output"></canvas>
+    
+</body>
+
+<script>
+    let img_input = document.getElementById("input_image");
+    let file_input = document.getElementById("file_input");
+
+    file_input.addEventListener("change", (e) => {
+        img_input.src = URL.createObjectURL(e.target.files[0]);
+    }, false);
+
+    img_input.onload = function(){
+        let mat = cv.imread(img_input);
+        cv.cvtColor(mat,mat, cv.COLOR_RGB2GRAY);
+        cv.imshow("output", mat);
+        mat.delete();
+    }
+</script>
+</html>

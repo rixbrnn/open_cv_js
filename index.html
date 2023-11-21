@@ -14,18 +14,22 @@
 
     <div>
       <label for="filter_select">Select a Filter:</label>
-      <select id="filter_select">
-        <option value="GRAY">Grayscale</option>
-        <option value="THRESHOLD">Threshold</option>
-        <option value="CANNY">Canny Edge Detection</option>
-        <option value="BLUR">Gaussian Blur</option>
-        <option value="ERODE">Erosion</option>
-        <option value="DILATE">Dilation</option>
-        <option value="SEPIA">Sepia</option>
-        <option value="BRIGHTNESS">Brightness Adjustment</option>
-        <option value="CONTRAST">Contrast Adjustment</option>
-        <option value="COLOR_OVERLAY">Random Color Overlay</option>
-      </select>
+      <div>
+        <button onclick="triggerFilter('GRAY')">Grayscale</button>
+        <button onclick="triggerFilter('THRESHOLD')">Threshold</button>
+        <button onclick="triggerFilter('CANNY')">Canny Edge Detection</button>
+        <button onclick="triggerFilter('BLUR')">Gaussian Blur</button>
+        <button onclick="triggerFilter('ERODE')">Erosion</button>
+        <button onclick="triggerFilter('DILATE')">Dilation</button>
+        <button onclick="triggerFilter('SEPIA')">Sepia</button>
+        <button onclick="triggerFilter('BRIGHTNESS')">
+          Brightness Adjustment
+        </button>
+        <button onclick="triggerFilter('CONTRAST')">Contrast Adjustment</button>
+        <button onclick="triggerFilter('COLOR_OVERLAY')">
+          Random Color Overlay
+        </button>
+      </div>
     </div>
   </body>
 
@@ -49,11 +53,24 @@
       mat.delete();
     };
 
-    function applyFilter(inputMat) {
-      let filter = filterSelect.value;
+    function triggerFilter(filterName) {
+      let mat = cv.imread(img_input);
+      applyFilter(mat, filterName);
+      mat.delete();
+    }
+
+    function applyFilter(inputMat, filter) {
       let outputMat = new cv.Mat();
       let kernel = cv.Mat.ones(5, 5, cv.CV_8U);
       let anchor = new cv.Point(-1, -1);
+
+      if (
+        inputMat.type() !== cv.CV_8UC1 &&
+        inputMat.type() !== cv.CV_8UC3 &&
+        inputMat.type() !== cv.CV_8UC4
+      ) {
+        cv.cvtColor(inputMat, inputMat, cv.COLOR_RGBA2RGB);
+      }
 
       if (
         inputMat.type() !== cv.CV_8UC1 &&

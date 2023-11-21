@@ -8,28 +8,29 @@
     <script async src="js/opencv.js"></script>
   </head>
   <body>
-    <img id="input_image" />
     <input type="file" id="file_input" />
+    <canvas id="permanentCanvas"></canvas>
     <canvas id="output"></canvas>
 
     <div>
       <label for="filter_select">Select a Filter:</label>
       <div>
-        <button onclick="triggerFilter('GRAY')">Grayscale</button>
-        <button onclick="triggerFilter('THRESHOLD')">Threshold</button>
-        <button onclick="triggerFilter('CANNY')">Canny Edge Detection</button>
-        <button onclick="triggerFilter('BLUR')">Gaussian Blur</button>
-        <button onclick="triggerFilter('ERODE')">Erosion</button>
-        <button onclick="triggerFilter('DILATE')">Dilation</button>
-        <button onclick="triggerFilter('SEPIA')">Sepia</button>
-        <button onclick="triggerFilter('BRIGHTNESS')">
+        <button onclick="previewFilter('GRAY')">Grayscale</button>
+        <button onclick="previewFilter('THRESHOLD')">Threshold</button>
+        <button onclick="previewFilter('CANNY')">Canny Edge Detection</button>
+        <button onclick="previewFilter('BLUR')">Gaussian Blur</button>
+        <button onclick="previewFilter('ERODE')">Erosion</button>
+        <button onclick="previewFilter('DILATE')">Dilation</button>
+        <button onclick="previewFilter('SEPIA')">Sepia</button>
+        <button onclick="previewFilter('BRIGHTNESS')">
           Brightness Adjustment
         </button>
-        <button onclick="triggerFilter('CONTRAST')">Contrast Adjustment</button>
-        <button onclick="triggerFilter('COLOR_OVERLAY')">
+        <button onclick="previewFilter('CONTRAST')">Contrast Adjustment</button>
+        <button onclick="previewFilter('COLOR_OVERLAY')">
           Random Color Overlay
         </button>
       </div>
+      <button id="applyButton">Apply</button>
     </div>
   </body>
 
@@ -38,20 +39,47 @@
     let file_input = document.getElementById("file_input");
     let outputCanvas = document.getElementById("output");
     let filterSelect = document.getElementById("filter_select");
+    let currentFilter = "";
 
     file_input.addEventListener(
       "change",
       (e) => {
-        img_input.src = URL.createObjectURL(e.target.files[0]);
+        let file = e.target.files[0];
+        let reader = new FileReader();
+        reader.onload = function (event) {
+          let img = new Image();
+          img.onload = function () {
+            let ctx = permanentCanvas.getContext("2d");
+            ctx.drawImage(
+              img,
+              0,
+              0,
+              permanentCanvas.width,
+              permanentCanvas.height
+            );
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
       },
       false
     );
 
-    img_input.onload = function () {
-      let mat = cv.imread(img_input);
-      applyFilter(mat);
-      mat.delete();
-    };
+    function previewFilter(filterName) {
+      currentFilter = filterName;
+      applyFilter(permanentCanvas, outputCanvas, filterName);
+    }
+
+    function applyPermanent() {
+      if (currentFilter) {
+        applyFilter(permanentCanvas, permanentCanvas, currentFilter);
+        currentFilter = "";
+      }
+    }
+
+    document
+      .getElementById("applyButton")
+      .addEventListener("click", applyPermanent);
 
     function triggerFilter(filterName) {
       let mat = cv.imread(img_input);
@@ -59,26 +87,22 @@
       mat.delete();
     }
 
-    function applyFilter(inputMat, filter) {
+    document
+      .getElementById("applyButton")
+      .addEventListener("click", applyPermanent);
+
+    function applyFilter(sourceCanvas, destinationCanvas, filter) {
+      let srcCtx = sourceCanvas.getContext("2d");
+      let imageData = srcCtx.getImageData(
+        0,
+        0,
+        sourceCanvas.width,
+        sourceCanvas.height
+      );
+      let inputMat = cv.matFromImageData(imageData); // Change 'mat' to 'inputMat'
       let outputMat = new cv.Mat();
       let kernel = cv.Mat.ones(5, 5, cv.CV_8U);
       let anchor = new cv.Point(-1, -1);
-
-      if (
-        inputMat.type() !== cv.CV_8UC1 &&
-        inputMat.type() !== cv.CV_8UC3 &&
-        inputMat.type() !== cv.CV_8UC4
-      ) {
-        cv.cvtColor(inputMat, inputMat, cv.COLOR_RGBA2RGB);
-      }
-
-      if (
-        inputMat.type() !== cv.CV_8UC1 &&
-        inputMat.type() !== cv.CV_8UC3 &&
-        inputMat.type() !== cv.CV_8UC4
-      ) {
-        cv.cvtColor(inputMat, inputMat, cv.COLOR_RGBA2RGB);
-      }
 
       switch (filter) {
         case "GRAY":
@@ -168,14 +192,8 @@
           outputMat = inputMat.clone();
       }
 
-      cv.imshow(outputCanvas, outputMat);
+      cv.imshow(destinationCanvas, outputMat); // Show on the destination canvas
       outputMat.delete();
     }
-
-    filterSelect.addEventListener("change", () => {
-      let mat = cv.imread(img_input);
-      applyFilter(mat);
-      mat.delete();
-    });
   </script>
 </html>

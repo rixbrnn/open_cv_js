@@ -62,20 +62,32 @@
       (e) => {
         let file = e.target.files[0];
         let reader = new FileReader();
+
         reader.onload = function (event) {
           let img = new Image();
           img.onload = function () {
-            let ctx = permanentCanvas.getContext("2d");
-            ctx.drawImage(
+
+            let ctxPermanent = permanentCanvas.getContext("2d");
+            ctxPermanent.drawImage(
               img,
               0,
               0,
               permanentCanvas.width,
               permanentCanvas.height
             );
+
+            let ctxOutput = outputCanvas.getContext("2d");
+            ctxOutput.drawImage(
+              img,
+              0,
+              0,
+              outputCanvas.width,
+              outputCanvas.height
+            );
           };
           img.src = event.target.result;
         };
+
         reader.readAsDataURL(file);
       },
       false

@@ -90,7 +90,24 @@
     </div>
 
     <div class="controls">
-      <div id="stickerContainer"></div>
+      <div id="stickerContainer">
+        <img src="./stickers/cigar.png" onclick="selectSticker(0)" />
+        <img
+          src="./stickers/deal_with_it_glasses.png"
+          onclick="selectSticker(1)"
+        />
+        <img
+          src="./stickers/doge_deal_with_it.png"
+          onclick="selectSticker(2)"
+        />
+        <img src="./stickers/gabe_the_dog.png" onclick="selectSticker(3)" />
+        <img src="./stickers/gold_chain.png" onclick="selectSticker(4)" />
+        <img src="./stickers/ricardo.png" onclick="selectSticker(5)" />
+        <img src="./stickers/roll_safe.png" onclick="selectSticker(6)" />
+        <img src="./stickers/snoop_left.png" onclick="selectSticker(7)" />
+        <img src="./stickers/snoop_right.png" onclick="selectSticker(8)" />
+        <img src="./stickers/thug_life_cap.png" onclick="selectSticker(9)" />
+      </div>
 
       <div>
         <button onclick="previewFilter('GRAY')">Grayscale</button>
@@ -336,32 +353,23 @@
     let placedStickers = [];
     let selectedSticker = null;
 
+    // Example of loading stickers
     function loadStickers() {
       const stickerSources = [
-        "stickers/cigar.png",
-        "stickers/deal_with_it_glasses.png",
-        "stickers/doge_deal_with_it.png",
-        "stickers/gabe_the_dog.png",
-        "stickers/gold_chain.png",
-        "stickers/ricardo.png",
-        "stickers/roll_safe.png",
-        "stickers/snoop_left.png",
-        "stickers/snoop_right.png",
-        "stickers/thug_life_cap.png",
+        "./stickers/cigar.png",
+        "./stickers/deal_with_it_glasses.png",
+        "./stickers/doge_deal_with_it.png",
+        "./stickers/gabe_the_dog.png",
+        "./stickers/gold_chain.png",
+        "./stickers/ricardo.png",
+        "./stickers/roll_safe.png",
+        "./stickers/snoop_left.png",
+        "./stickers/snoop_right.png",
+        "./stickers/thug_life_cap.png",
       ];
-
-      const stickerContainer = document.getElementById("stickerContainer");
-
-      stickerSources.forEach((src, index) => {
+      stickerSources.forEach((src) => {
         let img = new Image();
         img.src = src;
-        img.width = 100;
-        img.height = 100;
-        img.onclick = function () {
-          selectSticker(index);
-        };
-
-        stickerContainer.appendChild(img);
         stickers.push(img);
       });
     }

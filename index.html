@@ -1,32 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Opencv Project</title>
     <script async src="js/opencv.js"></script>
-</head>
-<body>
-    <img id="input_image">
-    <input type="file" id="file_input">
+  </head>
+  <body>
+    <img id="input_image" />
+    <input type="file" id="file_input" />
     <canvas id="output"></canvas>
-    
-</body>
 
-<script>
+    <div>
+      <label for="filter_select">Select a Filter:</label>
+      <select id="filter_select">
+        <option value="GRAY">Grayscale</option>
+        <option value="THRESHOLD">Threshold</option>
+        <option value="CANNY">Canny Edge Detection</option>
+        <option value="BLUR">Gaussian Blur</option>
+        <option value="ERODE">Erosion</option>
+        <option value="DILATE">Dilation</option>
+        <option value="SEPIA">Sepia</option>
+        <option value="BRIGHTNESS">Brightness Adjustment</option>
+        <option value="CONTRAST">Contrast Adjustment</option>
+        <option value="COLOR_OVERLAY">Random Color Overlay</option>
+      </select>
+    </div>
+  </body>
+
+  <script>
     let img_input = document.getElementById("input_image");
     let file_input = document.getElementById("file_input");
+    let outputCanvas = document.getElementById("output");
+    let filterSelect = document.getElementById("filter_select");
 
-    file_input.addEventListener("change", (e) => {
+    file_input.addEventListener(
+      "change",
+      (e) => {
         img_input.src = URL.createObjectURL(e.target.files[0]);
-    }, false);
+      },
+      false
+    );
 
-    img_input.onload = function(){
-        let mat = cv.imread(img_input);
-        cv.cvtColor(mat,mat, cv.COLOR_RGB2GRAY);
-        cv.imshow("output", mat);
-        mat.delete();
+    img_input.onload = function () {
+      let mat = cv.imread(img_input);
+      applyFilter(mat);
+      mat.delete();
+    };
+
+    function applyFilter(inputMat) {
+      let filter = filterSelect.value;
+      let outputMat = new cv.Mat();
+      let kernel = cv.Mat.ones(5, 5, cv.CV_8U);
+      let anchor = new cv.Point(-1, -1);
+
+      if (
+        inputMat.type() !== cv.CV_8UC1 &&
+        inputMat.type() !== cv.CV_8UC3 &&
+        inputMat.type() !== cv.CV_8UC4
+      ) {
+        cv.cvtColor(inputMat, inputMat, cv.COLOR_RGBA2RGB);
+      }
+
+      switch (filter) {
+        case "GRAY":
+          cv.cvtColor(inputMat, outputMat, cv.COLOR_RGB2GRAY);
+          break;
+        case "BRIGHTNESS":
+          inputMat.convertTo(outputMat, -1, 1, 50);
+          break;
+
+        case "CONTRAST":
+          inputMat.convertTo(outputMat, -1, 1.5, 0);
+          break;
+
+        case "COLOR_OVERLAY":
+          let overlayColor = new cv.Mat(
+            inputMat.rows,
+            inputMat.cols,
+            inputMat.type(),
+            [Math.random() * 255, Math.random() * 255, Math.random() * 255, 255]
+          );
+          let alpha = 0.5;
+          cv.addWeighted(
+            inputMat,
+            1 - alpha,
+            overlayColor,
+            alpha,
+            0,
+            outputMat
+          );
+          overlayColor.delete();
+          break;
+        case "THRESHOLD":
+          cv.threshold(inputMat, outputMat, 128, 255, cv.THRESH_BINARY);
+          break;
+        case "CANNY":
+          cv.Canny(inputMat, outputMat, 50, 100);
+          break;
+        case "BLUR":
+          let ksize = new cv.Size(5, 5);
+          cv.GaussianBlur(inputMat, outputMat, ksize, 0, 0, cv.BORDER_DEFAULT);
+          break;
+        case "ERODE":
+          cv.erode(
+            inputMat,
+            outputMat,
+            kernel,
+            anchor,
+            1,
+            cv.BORDER_CONSTANT,
+            cv.morphologyDefaultBorderValue()
+          );
+          break;
+        case "DILATE":
+          cv.dilate(
+            inputMat,
+            outputMat,
+            kernel,
+            anchor,
+            1,
+            cv.BORDER_CONSTANT,
+            cv.morphologyDefaultBorderValue()
+          );
+          break;
+        case "SEPIA":
+          if (inputMat.type() === cv.CV_8UC1) {
+            cv.cvtColor(inputMat, outputMat, cv.COLOR_GRAY2RGB);
+          } else {
+            inputMat.copyTo(outputMat);
+          }
+
+          for (let y = 0; y < outputMat.rows; y++) {
+            for (let x = 0; x < outputMat.cols; x++) {
+              let pixel = outputMat.ucharPtr(y, x);
+              let outputPixel = [
+                pixel[2] * 0.393 + pixel[1] * 0.769 + pixel[0] * 0.189,
+                pixel[2] * 0.349 + pixel[1] * 0.686 + pixel[0] * 0.168,
+                pixel[2] * 0.272 + pixel[1] * 0.534 + pixel[0] * 0.131,
+              ];
+              outputMat.ucharPtr(y, x)[0] = Math.min(255, outputPixel[2]);
+              outputMat.ucharPtr(y, x)[1] = Math.min(255, outputPixel[1]);
+              outputMat.ucharPtr(y, x)[2] = Math.min(255, outputPixel[0]);
+            }
+          }
+          break;
+
+        default:
+          outputMat = inputMat.clone();
+      }
+
+      cv.imshow(outputCanvas, outputMat);
+      outputMat.delete();
     }
-</script>
+
+    filterSelect.addEventListener("change", () => {
+      let mat = cv.imread(img_input);
+      applyFilter(mat);
+      mat.delete();
+    });
+  </script>
 </html>

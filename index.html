@@ -30,7 +30,15 @@
           Random Color Overlay
         </button>
       </div>
-      <button id="applyButton">Apply</button>
+      <input
+        type="range"
+        id="filterIntensity"
+        min="0"
+        max="1"
+        step="0.1"
+        value="1"
+        oninput="adjustIntensity()"
+      />
     </div>
   </body>
 
@@ -65,11 +73,6 @@
       false
     );
 
-    function previewFilter(filterName) {
-      currentFilter = filterName;
-      applyFilter(permanentCanvas, outputCanvas, filterName);
-    }
-
     function applyPermanent() {
       if (currentFilter) {
         applyFilter(permanentCanvas, permanentCanvas, currentFilter);
@@ -77,14 +80,27 @@
       }
     }
 
-    document
-      .getElementById("applyButton")
-      .addEventListener("click", applyPermanent);
-
     function triggerFilter(filterName) {
       let mat = cv.imread(img_input);
       applyFilter(mat, filterName);
       mat.delete();
+    }
+
+    function previewFilter(filterName) {
+      currentFilter = filterName;
+      applyCurrentFilter();
+    }
+
+    function adjustIntensity() {
+      if (currentFilter) {
+        applyCurrentFilter();
+      }
+    }
+
+    function applyCurrentFilter() {
+      let srcCanvas = permanentCanvas; // Assuming permanentCanvas has the original image
+      let dstCanvas = outputCanvas;
+      applyFilter(srcCanvas, dstCanvas, currentFilter);
     }
 
     document
@@ -99,8 +115,11 @@
         sourceCanvas.width,
         sourceCanvas.height
       );
-      let inputMat = cv.matFromImageData(imageData); // Change 'mat' to 'inputMat'
+      let inputMat = cv.matFromImageData(imageData);
       let outputMat = new cv.Mat();
+      let intensity = parseFloat(
+        document.getElementById("filterIntensity").value
+      );
       let kernel = cv.Mat.ones(5, 5, cv.CV_8U);
       let anchor = new cv.Point(-1, -1);
 
@@ -192,8 +211,26 @@
           outputMat = inputMat.clone();
       }
 
-      cv.imshow(destinationCanvas, outputMat); // Show on the destination canvas
+      if (intensity < 1) {
+        outputMat = blendWithOriginal(inputMat, outputMat, intensity);
+      }
+
+      cv.imshow(destinationCanvas, outputMat);
       outputMat.delete();
+      inputMat.delete();
+    }
+
+    function blendWithOriginal(originalMat, filteredMat, intensity) {
+      let blended = new cv.Mat();
+      cv.addWeighted(
+        filteredMat,
+        intensity,
+        originalMat,
+        1 - intensity,
+        0,
+        blended
+      );
+      return blended;
     }
   </script>
 </html>

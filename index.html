@@ -125,6 +125,7 @@
         />
       </div>
       <button id="applyButton">Apply</button>
+      <button id="downloadButton">Download Image</button>
     </div>
   </body>
 
@@ -368,6 +369,19 @@
           // Store sticker information
           placedStickers.push({ image: selectedSticker, x: x, y: y });
         }
+      });
+
+    document
+      .getElementById("downloadButton")
+      .addEventListener("click", function () {
+        let canvas = document.getElementById("permanentCanvas");
+        let image = canvas
+          .toDataURL("image/png")
+          .replace("image/png", "image/octet-stream");
+        let link = document.createElement("a");
+        link.download = "my-canvas-image.png";
+        link.href = image;
+        link.click();
       });
   </script>
 </html>

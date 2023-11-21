@@ -86,6 +86,15 @@
         applyFilter(permanentCanvas, permanentCanvas, currentFilter);
         currentFilter = "";
       }
+
+      // Re-apply stickers
+      let ctx = permanentCanvas.getContext("2d");
+      for (let stickerInfo of placedStickers) {
+        ctx.drawImage(stickerInfo.image, stickerInfo.x, stickerInfo.y);
+      }
+
+      // Clear the placed stickers as they are now permanent
+      placedStickers = [];
     }
 
     function triggerFilter(filterName) {
@@ -242,6 +251,7 @@
     }
 
     let stickers = [];
+    let placedStickers = [];
     let selectedSticker = null;
 
     // Example of loading stickers
@@ -260,20 +270,19 @@
     function selectSticker(index) {
       selectedSticker = stickers[index];
     }
-
     document
       .getElementById("output")
       .addEventListener("click", function (event) {
         if (selectedSticker) {
           let ctx = this.getContext("2d");
           let rect = this.getBoundingClientRect();
-          let x = event.clientX - rect.left;
-          let y = event.clientY - rect.top;
-          ctx.drawImage(
-            selectedSticker,
-            x - selectedSticker.width / 2,
-            y - selectedSticker.height / 2
-          );
+          let x = event.clientX - rect.left - selectedSticker.width / 2;
+          let y = event.clientY - rect.top - selectedSticker.height / 2;
+
+          ctx.drawImage(selectedSticker, x, y);
+
+          // Store sticker information
+          placedStickers.push({ image: selectedSticker, x: x, y: y });
         }
       });
   </script>

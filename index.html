@@ -6,21 +6,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Opencv Project</title>
     <script async src="js/opencv.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #f4f4f4;
+      }
+
+      .canvas-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      #permanentCanvas,
+      #output {
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin: 10px;
+      }
+
+      .controls {
+        text-align: center;
+        padding: 20px;
+      }
+
+      button,
+      input[type="file"] {
+        margin: 5px;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      button:hover,
+      input[type="file"]:hover {
+        background-color: #e9e9e9;
+      }
+
+      .slider-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .slider-container label {
+        margin-right: 10px;
+      }
+
+      #filterIntensity {
+        width: 300px;
+        margin: 10px;
+      }
+
+      #stickerContainer img {
+        width: 50px;
+        height: 50px;
+        margin: 5px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      #stickerContainer img:hover {
+        transform: scale(1.1);
+      }
+    </style>
   </head>
   <body>
     <input type="file" id="file_input" />
-    <canvas id="permanentCanvas"></canvas>
-    <canvas id="output"></canvas>
+    <div class="canvas-container">
+      <canvas id="permanentCanvas"></canvas>
+    </div>
+    <div class="canvas-container">
+      <canvas id="output"></canvas>
+    </div>
 
-    <div>
-      <label for="filter_select">Select a Filter:</label>
-      <div>
-        <div id="stickerContainer">
-          <!-- Dynamically create or add elements for each sticker -->
-          <img src="./stickers/cigar.png" onclick="selectSticker(0)" />
-          <!-- ... more stickers ... -->
-        </div>
+    <div class="controls">
+      <div id="stickerContainer">
+        <!-- Dynamically create or add elements for each sticker -->
+        <img src="./stickers/cigar.png" onclick="selectSticker(0)" />
+        <!-- ... more stickers ... -->
       </div>
+
       <div>
         <button onclick="previewFilter('GRAY')">Grayscale</button>
         <button onclick="previewFilter('THRESHOLD')">Threshold</button>
@@ -36,16 +110,20 @@
         <button onclick="previewFilter('COLOR_OVERLAY')">
           Random Color Overlay
         </button>
+        <!-- ... other filter buttons ... -->
       </div>
-      <input
-        type="range"
-        id="filterIntensity"
-        min="0"
-        max="1"
-        step="0.1"
-        value="1"
-        oninput="adjustIntensity()"
-      />
+      <div class="slider-container">
+        <label for="filterIntensity">Intensity: </label>
+        <input
+          type="range"
+          id="filterIntensity"
+          min="0"
+          max="1"
+          step="0.1"
+          value="1"
+          oninput="adjustIntensity()"
+        />
+      </div>
       <button id="applyButton">Apply</button>
     </div>
   </body>
@@ -66,24 +144,18 @@
         reader.onload = function (event) {
           let img = new Image();
           img.onload = function () {
+            // Set canvas dimensions to match image dimensions
+            permanentCanvas.width = img.width;
+            permanentCanvas.height = img.height;
+            outputCanvas.width = img.width;
+            outputCanvas.height = img.height;
 
+            // Draw the image on both canvases
             let ctxPermanent = permanentCanvas.getContext("2d");
-            ctxPermanent.drawImage(
-              img,
-              0,
-              0,
-              permanentCanvas.width,
-              permanentCanvas.height
-            );
+            ctxPermanent.drawImage(img, 0, 0, img.width, img.height);
 
             let ctxOutput = outputCanvas.getContext("2d");
-            ctxOutput.drawImage(
-              img,
-              0,
-              0,
-              outputCanvas.width,
-              outputCanvas.height
-            );
+            ctxOutput.drawImage(img, 0, 0, img.width, img.height);
           };
           img.src = event.target.result;
         };

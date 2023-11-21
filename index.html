@@ -15,6 +15,13 @@
     <div>
       <label for="filter_select">Select a Filter:</label>
       <div>
+        <div id="stickerContainer">
+          <!-- Dynamically create or add elements for each sticker -->
+          <img src="./stickers/cigar.png" onclick="selectSticker(0)" />
+          <!-- ... more stickers ... -->
+        </div>
+      </div>
+      <div>
         <button onclick="previewFilter('GRAY')">Grayscale</button>
         <button onclick="previewFilter('THRESHOLD')">Threshold</button>
         <button onclick="previewFilter('CANNY')">Canny Edge Detection</button>
@@ -233,5 +240,41 @@
       );
       return blended;
     }
+
+    let stickers = [];
+    let selectedSticker = null;
+
+    // Example of loading stickers
+    function loadStickers() {
+      const stickerSources = ["./stickers/cigar.png"]; // Add paths to your sticker images
+      stickerSources.forEach((src) => {
+        let img = new Image();
+        img.src = src;
+        stickers.push(img);
+      });
+    }
+
+    // Call this function on page load or when ready
+    loadStickers();
+
+    function selectSticker(index) {
+      selectedSticker = stickers[index];
+    }
+
+    document
+      .getElementById("output")
+      .addEventListener("click", function (event) {
+        if (selectedSticker) {
+          let ctx = this.getContext("2d");
+          let rect = this.getBoundingClientRect();
+          let x = event.clientX - rect.left;
+          let y = event.clientY - rect.top;
+          ctx.drawImage(
+            selectedSticker,
+            x - selectedSticker.width / 2,
+            y - selectedSticker.height / 2
+          );
+        }
+      });
   </script>
 </html>

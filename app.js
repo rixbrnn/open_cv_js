@@ -1,38 +1,22 @@
-let img_input = document.getElementById("input_image");
-let file_input = document.getElementById("file_input");
-let outputCanvas = document.getElementById("output");
-let filterSelect = document.getElementById("filter_select");
+// elements
+const applyButton = document.getElementById("applyButton");
+const downloadButton = document.getElementById("downloadButton");
+const fileInput = document.getElementById("file_input");
+const filterSelect = document.getElementById("filter_select");
+const imgInput = document.getElementById("input_image");
+const output = document.getElementById("output");
+// utils
 let currentFilter = "";
+let placedStickers = [];
+let selectedSticker = null;
+let stickers = [];
 
-file_input.addEventListener(
-  "change",
-  (e) => {
-    let file = e.target.files[0];
-    let reader = new FileReader();
+loadStickers();
 
-    reader.onload = function (event) {
-      let img = new Image();
-      img.onload = function () {
-        // Set canvas dimensions to match image dimensions
-        permanentCanvas.width = img.width;
-        permanentCanvas.height = img.height;
-        outputCanvas.width = img.width;
-        outputCanvas.height = img.height;
-
-        // Draw the image on both canvases
-        let ctxPermanent = permanentCanvas.getContext("2d");
-        ctxPermanent.drawImage(img, 0, 0, img.width, img.height);
-
-        let ctxOutput = outputCanvas.getContext("2d");
-        ctxOutput.drawImage(img, 0, 0, img.width, img.height);
-      };
-      img.src = event.target.result;
-    };
-
-    reader.readAsDataURL(file);
-  },
-  false
-);
+applyButton.addEventListener("click", applyPermanent);
+downloadButton.addEventListener("click", downloadImage);
+fileInput.addEventListener("change", updateCanvas, false);
+output.addEventListener("click", applySticker);
 
 function applyPermanent() {
   if (currentFilter) {
@@ -51,7 +35,7 @@ function applyPermanent() {
 }
 
 function triggerFilter(filterName) {
-  let mat = cv.imread(img_input);
+  let mat = cv.imread(imgInput);
   applyFilter(mat, filterName);
   mat.delete();
 }
@@ -69,13 +53,9 @@ function adjustIntensity() {
 
 function applyCurrentFilter() {
   let srcCanvas = permanentCanvas; // Assuming permanentCanvas has the original image
-  let dstCanvas = outputCanvas;
+  let dstCanvas = output;
   applyFilter(srcCanvas, dstCanvas, currentFilter);
 }
-
-document
-  .getElementById("applyButton")
-  .addEventListener("click", applyPermanent);
 
 function applyFilter(sourceCanvas, destinationCanvas, filter) {
   let srcCtx = sourceCanvas.getContext("2d");
@@ -98,11 +78,9 @@ function applyFilter(sourceCanvas, destinationCanvas, filter) {
     case "BRIGHTNESS":
       inputMat.convertTo(outputMat, -1, 1, 50);
       break;
-
     case "CONTRAST":
       inputMat.convertTo(outputMat, -1, 1.5, 0);
       break;
-
     case "COLOR_OVERLAY":
       let overlayColor = new cv.Mat(
         inputMat.rows,
@@ -167,7 +145,6 @@ function applyFilter(sourceCanvas, destinationCanvas, filter) {
         }
       }
       break;
-
     default:
       outputMat = inputMat.clone();
   }
@@ -194,11 +171,6 @@ function blendWithOriginal(originalMat, filteredMat, intensity) {
   return blended;
 }
 
-let stickers = [];
-let placedStickers = [];
-let selectedSticker = null;
-
-// Example of loading stickers
 function loadStickers() {
   const stickerSources = [
     "./stickers/cigar.png",
@@ -219,36 +191,58 @@ function loadStickers() {
   });
 }
 
-// Call this function on page load or when ready
-loadStickers();
-
 function selectSticker(index) {
   selectedSticker = stickers[index];
 }
 
-document.getElementById("output").addEventListener("click", function (event) {
-  if (selectedSticker) {
-    let ctx = this.getContext("2d");
-    let rect = this.getBoundingClientRect();
-    let x = event.clientX - rect.left - selectedSticker.width / 2;
-    let y = event.clientY - rect.top - selectedSticker.height / 2;
-
-    ctx.drawImage(selectedSticker, x, y);
-
-    // Store sticker information
-    placedStickers.push({ image: selectedSticker, x: x, y: y });
+function applySticker(event) {
+  if (!selectedSticker) {
+    return;
   }
-});
+  let ctx = this.getContext("2d");
+  let rect = this.getBoundingClientRect();
+  let x = event.clientX - rect.left - selectedSticker.width / 2;
+  let y = event.clientY - rect.top - selectedSticker.height / 2;
 
-document
-  .getElementById("downloadButton")
-  .addEventListener("click", function () {
-    let canvas = document.getElementById("permanentCanvas");
-    let image = canvas
-      .toDataURL("image/png")
-      .replace("image/png", "image/octet-stream");
-    let link = document.createElement("a");
-    link.download = "my-canvas-image.png";
-    link.href = image;
-    link.click();
-  });
+  ctx.drawImage(selectedSticker, x, y);
+
+  // Store sticker information
+  placedStickers.push({ image: selectedSticker, x: x, y: y });
+}
+
+function downloadImage() {
+  let canvas = document.getElementById("permanentCanvas");
+  let image = canvas
+    .toDataURL("image/png")
+    .replace("image/png", "image/octet-stream");
+  let link = document.createElement("a");
+  link.download = "my-canvas-image.png";
+  link.href = image;
+  link.click();
+}
+
+function updateCanvas(event) {
+  let file = event.target.files[0];
+  let reader = new FileReader();
+
+  reader.onload = function (event) {
+    let img = new Image();
+    img.onload = function () {
+      // Set canvas dimensions to match image dimensions
+      permanentCanvas.width = img.width;
+      permanentCanvas.height = img.height;
+      output.width = img.width;
+      output.height = img.height;
+
+      // Draw the image on both canvases
+      let ctxPermanent = permanentCanvas.getContext("2d");
+      ctxPermanent.drawImage(img, 0, 0, img.width, img.height);
+
+      let ctxOutput = output.getContext("2d");
+      ctxOutput.drawImage(img, 0, 0, img.width, img.height);
+    };
+    img.src = event.target.result;
+  };
+
+  reader.readAsDataURL(file);
+}

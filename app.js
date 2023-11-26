@@ -28,8 +28,8 @@ function applyPermanent() {
   }
 
   // Re-apply stickers
-  let ctx = permanentCanvas.getContext("2d");
-  for (let stickerInfo of placedStickers) {
+  const ctx = permanentCanvas.getContext("2d");
+  for (const stickerInfo of placedStickers) {
     ctx.drawImage(
       stickerInfo.image,
       stickerInfo.x,
@@ -44,7 +44,7 @@ function applyPermanent() {
 }
 
 function triggerFilter(filterName) {
-  let mat = cv.imread(imgInput);
+  const mat = cv.imread(imgInput);
   applyFilter(mat, filterName);
   mat.delete();
 }
@@ -65,24 +65,24 @@ function setStickerSize() {
 }
 
 function applyCurrentFilter() {
-  let srcCanvas = permanentCanvas; // Assuming permanentCanvas has the original image
-  let dstCanvas = output;
+  const srcCanvas = permanentCanvas; // Assuming permanentCanvas has the original image
+  const dstCanvas = output;
   applyFilter(srcCanvas, dstCanvas, currentFilter);
 }
 
 function applyFilter(sourceCanvas, destinationCanvas, filter) {
-  let srcCtx = sourceCanvas.getContext("2d");
-  let imageData = srcCtx.getImageData(
+  const srcCtx = sourceCanvas.getContext("2d");
+  const imageData = srcCtx.getImageData(
     0,
     0,
     sourceCanvas.width,
     sourceCanvas.height
   );
-  let inputMat = cv.matFromImageData(imageData);
-  let outputMat = new cv.Mat();
-  let intensity = parseFloat(filterIntensitySlider.value);
-  let kernel = cv.Mat.ones(5, 5, cv.CV_8U);
-  let anchor = new cv.Point(-1, -1);
+  const inputMat = cv.matFromImageData(imageData);
+  const outputMat = new cv.Mat();
+  const intensity = parseFloat(filterIntensitySlider.value);
+  const kernel = cv.Mat.ones(5, 5, cv.CV_8U);
+  const anchor = new cv.Point(-1, -1);
 
   switch (filter) {
     case "GRAY":
@@ -95,13 +95,13 @@ function applyFilter(sourceCanvas, destinationCanvas, filter) {
       inputMat.convertTo(outputMat, -1, 1.5, 0);
       break;
     case "COLOR_OVERLAY":
-      let overlayColor = new cv.Mat(
+      const overlayColor = new cv.Mat(
         inputMat.rows,
         inputMat.cols,
         inputMat.type(),
         [Math.random() * 255, Math.random() * 255, Math.random() * 255, 255]
       );
-      let alpha = 0.5;
+      const alpha = 0.5;
       cv.addWeighted(inputMat, 1 - alpha, overlayColor, alpha, 0, outputMat);
       overlayColor.delete();
       break;
@@ -112,7 +112,7 @@ function applyFilter(sourceCanvas, destinationCanvas, filter) {
       cv.Canny(inputMat, outputMat, 50, 100);
       break;
     case "BLUR":
-      let ksize = new cv.Size(5, 5);
+      const ksize = new cv.Size(5, 5);
       cv.GaussianBlur(inputMat, outputMat, ksize, 0, 0, cv.BORDER_DEFAULT);
       break;
     case "ERODE":
@@ -146,8 +146,8 @@ function applyFilter(sourceCanvas, destinationCanvas, filter) {
 
       for (let y = 0; y < outputMat.rows; y++) {
         for (let x = 0; x < outputMat.cols; x++) {
-          let pixel = outputMat.ucharPtr(y, x);
-          let outputPixel = [
+          const pixel = outputMat.ucharPtr(y, x);
+          const outputPixel = [
             pixel[2] * 0.393 + pixel[1] * 0.769 + pixel[0] * 0.189,
             pixel[2] * 0.349 + pixel[1] * 0.686 + pixel[0] * 0.168,
             pixel[2] * 0.272 + pixel[1] * 0.534 + pixel[0] * 0.131,
@@ -172,7 +172,7 @@ function applyFilter(sourceCanvas, destinationCanvas, filter) {
 }
 
 function blendWithOriginal(originalMat, filteredMat, intensity) {
-  let blended = new cv.Mat();
+  const blended = new cv.Mat();
   cv.addWeighted(
     filteredMat,
     intensity,
@@ -204,7 +204,7 @@ function loadStickers() {
     "./stickers/thug_life_cap.png",
   ];
   stickerSources.forEach((src) => {
-    let img = new Image();
+    const img = new Image();
     img.src = src;
     stickers.push(img);
   });
@@ -244,22 +244,22 @@ function applySticker(event) {
 }
 
 function downloadImage() {
-  let canvas = document.getElementById("permanentCanvas");
-  let image = canvas
+  const canvas = document.getElementById("permanentCanvas");
+  const image = canvas
     .toDataURL("image/png")
     .replace("image/png", "image/octet-stream");
-  let link = document.createElement("a");
+  const link = document.createElement("a");
   link.download = "my-canvas-image.png";
   link.href = image;
   link.click();
 }
 
 function updateCanvas(event) {
-  let file = event.target.files[0];
-  let reader = new FileReader();
+  const file = event.target.files[0];
+  const reader = new FileReader();
 
   reader.onload = function (event) {
-    let img = new Image();
+    const img = new Image();
     img.onload = function () {
       // Set canvas dimensions to match image dimensions
       permanentCanvas.width = img.width;
@@ -268,10 +268,10 @@ function updateCanvas(event) {
       output.height = img.height;
 
       // Draw the image on both canvases
-      let ctxPermanent = permanentCanvas.getContext("2d");
+      const ctxPermanent = permanentCanvas.getContext("2d");
       ctxPermanent.drawImage(img, 0, 0, img.width, img.height);
 
-      let ctxOutput = output.getContext("2d");
+      const ctxOutput = output.getContext("2d");
       ctxOutput.drawImage(img, 0, 0, img.width, img.height);
     };
     img.src = event.target.result;

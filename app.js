@@ -30,7 +30,13 @@ function applyPermanent() {
   // Re-apply stickers
   let ctx = permanentCanvas.getContext("2d");
   for (let stickerInfo of placedStickers) {
-    ctx.drawImage(stickerInfo.image, stickerInfo.x, stickerInfo.y);
+    ctx.drawImage(
+      stickerInfo.image,
+      stickerInfo.x,
+      stickerInfo.y,
+      stickerInfo.width,
+      stickerInfo.height
+    );
   }
 
   // Clear the placed stickers as they are now permanent
@@ -213,29 +219,27 @@ function applySticker(event) {
     return;
   }
 
-  let ctx = this.getContext("2d");
-  let rect = this.getBoundingClientRect();
-
-  let stickerSize = {
+  const ctx = this.getContext("2d");
+  const rect = this.getBoundingClientRect();
+  const sticker = {
     width: permanentCanvas.width * stickerSizeModifier,
     height:
       permanentCanvas.width *
       stickerSizeModifier *
       (selectedSticker.height / selectedSticker.width),
   };
+  const x = event.clientX - rect.left - sticker.width / 2;
+  const y = event.clientY - rect.top - sticker.height / 2;
 
-  let x = event.clientX - rect.left - stickerSize.width / 2;
-  let y = event.clientY - rect.top - stickerSize.height / 2;
-
-  ctx.drawImage(selectedSticker, x, y, stickerSize.width, stickerSize.height);
+  ctx.drawImage(selectedSticker, x, y, sticker.width, sticker.height);
 
   // Store sticker information
   placedStickers.push({
     image: selectedSticker,
     x: x,
     y: y,
-    width: stickerSize.width,
-    height: stickerSize.height,
+    width: sticker.width,
+    height: sticker.height,
   });
 }
 

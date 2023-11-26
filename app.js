@@ -10,6 +10,8 @@ let currentFilter = "";
 let placedStickers = [];
 let selectedSticker = null;
 let stickers = [];
+// constants
+const STICKER_SIZE_MODIFIER = 0.25;
 
 loadStickers();
 
@@ -199,15 +201,31 @@ function applySticker(event) {
   if (!selectedSticker) {
     return;
   }
+
   let ctx = this.getContext("2d");
   let rect = this.getBoundingClientRect();
-  let x = event.clientX - rect.left - selectedSticker.width / 2;
-  let y = event.clientY - rect.top - selectedSticker.height / 2;
 
-  ctx.drawImage(selectedSticker, x, y);
+  let stickerSize = {
+    width: permanentCanvas.width * STICKER_SIZE_MODIFIER,
+    height:
+      permanentCanvas.width *
+      STICKER_SIZE_MODIFIER *
+      (selectedSticker.height / selectedSticker.width),
+  };
+
+  let x = event.clientX - rect.left - stickerSize.width / 2;
+  let y = event.clientY - rect.top - stickerSize.height / 2;
+
+  ctx.drawImage(selectedSticker, x, y, stickerSize.width, stickerSize.height);
 
   // Store sticker information
-  placedStickers.push({ image: selectedSticker, x: x, y: y });
+  placedStickers.push({
+    image: selectedSticker,
+    x: x,
+    y: y,
+    width: stickerSize.width,
+    height: stickerSize.height,
+  });
 }
 
 function downloadImage() {

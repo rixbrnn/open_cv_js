@@ -90,6 +90,35 @@
     </div>
 
     <div class="controls">
+      <div>
+        <button onclick="previewFilter('GRAY')">Grayscale</button>
+        <button onclick="previewFilter('THRESHOLD')">Threshold</button>
+        <button onclick="previewFilter('CANNY')">Canny Edge Detection</button>
+        <button onclick="previewFilter('BLUR')">Gaussian Blur</button>
+        <button onclick="previewFilter('ERODE')">Erosion</button>
+        <button onclick="previewFilter('DILATE')">Dilation</button>
+        <button onclick="previewFilter('SEPIA')">Sepia</button>
+        <button onclick="previewFilter('BRIGHTNESS')">
+          Brightness Adjustment
+        </button>
+        <button onclick="previewFilter('CONTRAST')">Contrast Adjustment</button>
+        <button onclick="previewFilter('COLOR_OVERLAY')">
+          Random Color Overlay
+        </button>
+        <!-- ... other filter buttons ... -->
+      </div>
+      <div class="slider-container">
+        <label for="filterIntensity">Intensity: </label>
+        <input
+          type="range"
+          id="filterIntensity"
+          min="0"
+          max="1"
+          step="0.1"
+          value="1"
+          oninput="adjustIntensity()"
+        />
+      </div>
       <div id="stickerContainer">
         <img src="./stickers/cigar.png" onclick="selectSticker(0)" />
         <img
@@ -118,35 +147,6 @@
           step="0.01"
           value="1"
           oninput="setStickerSize()"
-        />
-      </div>
-      <div>
-        <button onclick="previewFilter('GRAY')">Grayscale</button>
-        <button onclick="previewFilter('THRESHOLD')">Threshold</button>
-        <button onclick="previewFilter('CANNY')">Canny Edge Detection</button>
-        <button onclick="previewFilter('BLUR')">Gaussian Blur</button>
-        <button onclick="previewFilter('ERODE')">Erosion</button>
-        <button onclick="previewFilter('DILATE')">Dilation</button>
-        <button onclick="previewFilter('SEPIA')">Sepia</button>
-        <button onclick="previewFilter('BRIGHTNESS')">
-          Brightness Adjustment
-        </button>
-        <button onclick="previewFilter('CONTRAST')">Contrast Adjustment</button>
-        <button onclick="previewFilter('COLOR_OVERLAY')">
-          Random Color Overlay
-        </button>
-        <!-- ... other filter buttons ... -->
-      </div>
-      <div class="slider-container">
-        <label for="filterIntensity">Intensity: </label>
-        <input
-          type="range"
-          id="filterIntensity"
-          min="0"
-          max="1"
-          step="0.1"
-          value="1"
-          oninput="adjustIntensity()"
         />
       </div>
       <button id="applyButton">Apply</button>

@@ -108,7 +108,18 @@
         <img src="./stickers/snoop_right.png" onclick="selectSticker(8)" />
         <img src="./stickers/thug_life_cap.png" onclick="selectSticker(9)" />
       </div>
-
+      <div class="slider-container">
+        <label for="stickerSize">Sticker size: </label>
+        <input
+          type="range"
+          id="stickerSize"
+          min="0.01"
+          max="1"
+          step="0.01"
+          value="1"
+          oninput="setStickerSize()"
+        />
+      </div>
       <div>
         <button onclick="previewFilter('GRAY')">Grayscale</button>
         <button onclick="previewFilter('THRESHOLD')">Threshold</button>

@@ -2,16 +2,17 @@
 const applyButton = document.getElementById("applyButton");
 const downloadButton = document.getElementById("downloadButton");
 const fileInput = document.getElementById("file_input");
+const filterIntensitySlider = document.getElementById("filterIntensity");
 const filterSelect = document.getElementById("filter_select");
 const imgInput = document.getElementById("input_image");
 const output = document.getElementById("output");
+const stickerSizeSlider = document.getElementById("stickerSize");
 // utils
 let currentFilter = "";
 let placedStickers = [];
 let selectedSticker = null;
 let stickers = [];
-// constants
-const STICKER_SIZE_MODIFIER = 0.25;
+let stickerSizeModifier = 1;
 
 loadStickers();
 
@@ -53,6 +54,10 @@ function adjustIntensity() {
   }
 }
 
+function setStickerSize() {
+  stickerSizeModifier = parseFloat(stickerSizeSlider.value);
+}
+
 function applyCurrentFilter() {
   let srcCanvas = permanentCanvas; // Assuming permanentCanvas has the original image
   let dstCanvas = output;
@@ -69,7 +74,7 @@ function applyFilter(sourceCanvas, destinationCanvas, filter) {
   );
   let inputMat = cv.matFromImageData(imageData);
   let outputMat = new cv.Mat();
-  let intensity = parseFloat(document.getElementById("filterIntensity").value);
+  let intensity = parseFloat(filterIntensitySlider.value);
   let kernel = cv.Mat.ones(5, 5, cv.CV_8U);
   let anchor = new cv.Point(-1, -1);
 
@@ -206,10 +211,10 @@ function applySticker(event) {
   let rect = this.getBoundingClientRect();
 
   let stickerSize = {
-    width: permanentCanvas.width * STICKER_SIZE_MODIFIER,
+    width: permanentCanvas.width * stickerSizeModifier,
     height:
       permanentCanvas.width *
-      STICKER_SIZE_MODIFIER *
+      stickerSizeModifier *
       (selectedSticker.height / selectedSticker.width),
   };
 

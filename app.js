@@ -292,3 +292,60 @@ function updateCanvas(event) {
 
   reader.readAsDataURL(file);
 }
+
+const startWebcamButton = document.getElementById("startWebcamButton");
+const webcamVideo = document.getElementById("webcamVideo");
+
+startWebcamButton.addEventListener("click", startWebcam);
+
+function startWebcam() {
+  if (navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then(function (stream) {
+        webcamVideo.srcObject = stream;
+        webcamVideo.style.display = "block";
+      })
+      .catch(function (error) {
+        console.log("Something went wrong!", error);
+      });
+  }
+}
+
+webcamVideo.addEventListener("click", takeScreenshot);
+
+function takeScreenshot() {
+  const canvas = document.createElement("canvas");
+  canvas.width = webcamVideo.videoWidth;
+  canvas.height = webcamVideo.videoHeight;
+  canvas
+    .getContext("2d")
+    .drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
+
+  // Set canvas dimensions to match video dimensions
+  permanentCanvas.width = canvas.width;
+  permanentCanvas.height = canvas.height;
+  output.width = canvas.width;
+  output.height = canvas.height;
+
+  // Draw the image on both canvases
+  const ctxPermanent = permanentCanvas.getContext("2d");
+  ctxPermanent.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+
+  const ctxOutput = output.getContext("2d");
+  ctxOutput.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+
+  saveState(permanentCanvas); // Save state after image is captured
+}
+
+const closeWebcamButton = document.getElementById("closeWebcamButton");
+
+closeWebcamButton.addEventListener("click", closeWebcam);
+
+function closeWebcam() {
+  if (webcamVideo.srcObject) {
+    webcamVideo.srcObject.getTracks().forEach((track) => track.stop());
+    webcamVideo.srcObject = null;
+    webcamVideo.style.display = "none";
+  }
+}

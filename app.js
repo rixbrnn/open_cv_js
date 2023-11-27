@@ -50,7 +50,10 @@ function triggerFilter(filterName) {
 }
 
 function previewFilter(filterName) {
+  clearStickers();
+
   currentFilter = filterName;
+
   applyCurrentFilter();
 }
 
@@ -241,6 +244,16 @@ function applySticker(event) {
     width: sticker.width,
     height: sticker.height,
   });
+}
+
+function clearStickers() {
+  const ctx = output.getContext("2d");
+  ctx.clearRect(0, 0, output.width, output.height);
+
+  placedStickers = [];
+
+  const ctxPermanent = permanentCanvas.getContext("2d");
+  ctx.drawImage(ctxPermanent.canvas, 0, 0);
 }
 
 function downloadImage() {

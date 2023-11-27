@@ -78,8 +78,8 @@ function applyFilter(sourceCanvas, destinationCanvas, filter) {
     sourceCanvas.width,
     sourceCanvas.height
   );
-  const inputMat = cv.matFromImageData(imageData);
-  const outputMat = new cv.Mat();
+  let inputMat = cv.matFromImageData(imageData);
+  let outputMat = new cv.Mat();
   const intensity = parseFloat(filterIntensitySlider.value);
   const kernel = cv.Mat.ones(5, 5, cv.CV_8U);
   const anchor = new cv.Point(-1, -1);
